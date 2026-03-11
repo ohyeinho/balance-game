@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { questions } from "@/lib/questions";
+import { questions, categories, TOTAL_QUESTIONS } from "@/lib/questions";
 
 interface GameResponse {
   id: string;
@@ -136,7 +136,7 @@ export default function ResultsPage() {
     for (let i = 0; i < responses.length; i++) {
       for (let j = i + 1; j < responses.length; j++) {
         let matches = 0;
-        for (let q = 1; q <= 10; q++) {
+        for (let q = 1; q <= TOTAL_QUESTIONS; q++) {
           if (responses[i].answers[String(q)] === responses[j].answers[String(q)]) {
             matches++;
           }
@@ -153,7 +153,6 @@ export default function ResultsPage() {
   };
 
   const topCouples = getMatchingCouples();
-  const medals = ["1st", "2nd", "3rd"];
   const medalColors = [
     "from-yellow-400 to-amber-500",
     "from-gray-300 to-gray-400",
@@ -161,7 +160,6 @@ export default function ResultsPage() {
   ];
   const medalEmojis = ["\uD83E\uDD47", "\uD83E\uDD48", "\uD83E\uDD49"];
 
-  // Calculate stats per question
   const getStats = (qId: number) => {
     let aCount = 0;
     let bCount = 0;
@@ -210,13 +208,13 @@ export default function ResultsPage() {
                     {couple.nameA} & {couple.nameB}
                   </p>
                   <p className="text-xs text-gray-400">
-                    10문제 중 {couple.matches}개 일치
+                    {TOTAL_QUESTIONS}문제 중 {couple.matches}개 일치
                   </p>
                 </div>
                 <div
                   className={`text-white text-xs font-extrabold px-3 py-1.5 rounded-full bg-gradient-to-r ${medalColors[idx]}`}
                 >
-                  {couple.matches * 10}%
+                  {Math.round((couple.matches / TOTAL_QUESTIONS) * 100)}%
                 </div>
               </div>
             ))}
@@ -260,82 +258,111 @@ export default function ResultsPage() {
         </div>
       )}
 
-      <div className="space-y-4">
-        {questions.map((q) => {
-          const stats = getStats(q.id);
-          return (
-            <div
-              key={q.id}
-              className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-100"
-            >
-              <p className="text-xs text-gray-400 font-bold mb-2">
-                Q{q.id}.
-              </p>
-
-              {/* Stats bar */}
-              <div className="flex gap-1 mb-3 h-8 rounded-xl overflow-hidden text-xs font-bold">
-                <div
-                  className="bg-blue-500 text-white flex items-center justify-center transition-all duration-500 rounded-l-xl"
-                  style={{ width: `${stats.aPercent || 1}%`, minWidth: stats.aCount > 0 ? '2rem' : '0' }}
-                >
-                  {stats.aPercent}%
-                </div>
-                <div
-                  className="bg-orange-500 text-white flex items-center justify-center transition-all duration-500 rounded-r-xl"
-                  style={{ width: `${stats.bPercent || 1}%`, minWidth: stats.bCount > 0 ? '2rem' : '0' }}
-                >
-                  {stats.bPercent}%
-                </div>
-              </div>
-
-              {/* Options */}
-              <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-                <div className="bg-blue-50 rounded-xl p-2">
-                  <span className="font-bold text-blue-600">A.</span>{" "}
-                  <span className="text-gray-600">{q.optionA}</span>
-                </div>
-                <div className="bg-orange-50 rounded-xl p-2">
-                  <span className="font-bold text-orange-600">B.</span>{" "}
-                  <span className="text-gray-600">{q.optionB}</span>
-                </div>
-              </div>
-
-              {/* Individual responses - A vs B split */}
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="space-y-1">
-                  <p className="font-bold text-blue-500 text-center mb-1.5">A ({stats.aCount}명)</p>
-                  {responses
-                    .filter((r) => r.answers[String(q.id)] === "A")
-                    .map((r) => (
-                      <div
-                        key={r.id}
-                        className="bg-blue-50 text-blue-700 font-medium px-2.5 py-1.5 rounded-lg text-center"
-                      >
-                        {r.name}
-                      </div>
-                    ))}
-                </div>
-                <div className="space-y-1">
-                  <p className="font-bold text-orange-500 text-center mb-1.5">B ({stats.bCount}명)</p>
-                  {responses
-                    .filter((r) => r.answers[String(q.id)] === "B")
-                    .map((r) => (
-                      <div
-                        key={r.id}
-                        className="bg-orange-50 text-orange-700 font-medium px-2.5 py-1.5 rounded-lg text-center"
-                      >
-                        {r.name}
-                      </div>
-                    ))}
-                </div>
+      {/* Questions by category */}
+      {categories.map((cat) => {
+        const categoryQuestions = questions.filter((q) => q.category === cat.id);
+        return (
+          <div key={cat.id} className="mb-8">
+            {/* Category header */}
+            <div className="flex items-center gap-2 mb-4 mt-2">
+              <span className="text-2xl">{cat.emoji}</span>
+              <div>
+                <h2 className="text-base font-extrabold text-gray-800">
+                  {cat.title}
+                </h2>
+                <p className="text-xs text-gray-400">{cat.subtitle}</p>
               </div>
             </div>
-          );
-        })}
-      </div>
+
+            <div className="space-y-4">
+              {categoryQuestions.map((q) => {
+                const stats = getStats(q.id);
+                return (
+                  <div
+                    key={q.id}
+                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-100"
+                  >
+                    <p className="text-xs text-gray-400 font-bold mb-2">
+                      Q{q.id}.
+                    </p>
+
+                    {/* Stats bar */}
+                    <div className="flex gap-1 mb-3 h-8 rounded-xl overflow-hidden text-xs font-bold">
+                      <div
+                        className="bg-blue-500 text-white flex items-center justify-center transition-all duration-500 rounded-l-xl"
+                        style={{
+                          width: `${stats.aPercent || 1}%`,
+                          minWidth: stats.aCount > 0 ? "2rem" : "0",
+                        }}
+                      >
+                        {stats.aPercent}%
+                      </div>
+                      <div
+                        className="bg-orange-500 text-white flex items-center justify-center transition-all duration-500 rounded-r-xl"
+                        style={{
+                          width: `${stats.bPercent || 1}%`,
+                          minWidth: stats.bCount > 0 ? "2rem" : "0",
+                        }}
+                      >
+                        {stats.bPercent}%
+                      </div>
+                    </div>
+
+                    {/* Options */}
+                    <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                      <div className="bg-blue-50 rounded-xl p-2">
+                        <span className="font-bold text-blue-600">A.</span>{" "}
+                        <span className="text-gray-600">{q.optionA}</span>
+                      </div>
+                      <div className="bg-orange-50 rounded-xl p-2">
+                        <span className="font-bold text-orange-600">B.</span>{" "}
+                        <span className="text-gray-600">{q.optionB}</span>
+                      </div>
+                    </div>
+
+                    {/* Individual responses - A vs B split */}
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="space-y-1">
+                        <p className="font-bold text-blue-500 text-center mb-1.5">
+                          A ({stats.aCount}명)
+                        </p>
+                        {responses
+                          .filter((r) => r.answers[String(q.id)] === "A")
+                          .map((r) => (
+                            <div
+                              key={r.id}
+                              className="bg-blue-50 text-blue-700 font-medium px-2.5 py-1.5 rounded-lg text-center"
+                            >
+                              {r.name}
+                            </div>
+                          ))}
+                      </div>
+                      <div className="space-y-1">
+                        <p className="font-bold text-orange-500 text-center mb-1.5">
+                          B ({stats.bCount}명)
+                        </p>
+                        {responses
+                          .filter((r) => r.answers[String(q.id)] === "B")
+                          .map((r) => (
+                            <div
+                              key={r.id}
+                              className="bg-orange-50 text-orange-700 font-medium px-2.5 py-1.5 rounded-lg text-center"
+                            >
+                              {r.name}
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
 
       {/* Reset button */}
-      <div className="mt-8 mb-8 flex flex-col items-center gap-3">
+      <div className="mt-4 mb-8 flex flex-col items-center gap-3">
         <button
           onClick={handleReset}
           className="px-6 py-3 text-sm font-bold rounded-2xl

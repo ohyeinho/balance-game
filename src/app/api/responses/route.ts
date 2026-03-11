@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { saveResponse } from "@/lib/db";
+import { TOTAL_QUESTIONS } from "@/lib/questions";
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 1; i <= TOTAL_QUESTIONS; i++) {
       const answer = answers[String(i)];
       if (answer !== "A" && answer !== "B") {
         return NextResponse.json(

@@ -15,19 +15,17 @@ export default function Home() {
     if (!trimmed) return;
     reset();
     setName(trimmed);
-    router.push("/game/1");
+    router.push("/game/intro/1");
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 animate-fade-in">
       <div className="text-6xl mb-4 animate-bounce-slow">&#9878;</div>
       <h1 className="text-3xl font-extrabold text-gray-800 mb-2 text-center">
-        직장생활
-        <br />
         밸런스 게임
       </h1>
       <p className="text-gray-500 mb-10 text-center text-sm">
-        10가지 질문으로 알아보는 나의 직장 가치관
+        3가지 카테고리, 30문제로 알아보는 나의 가치관
       </p>
 
       <div className="w-full max-w-xs">

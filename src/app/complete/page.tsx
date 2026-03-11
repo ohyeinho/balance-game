@@ -76,7 +76,7 @@ export default function CompletePage() {
         직장 가치관이 기록되었습니다
       </p>
       <p className="text-gray-400 text-sm text-center mb-10">
-        10가지 선택 모두 완료!
+        30가지 선택 모두 완료!
       </p>
 
       <button
