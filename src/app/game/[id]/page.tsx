@@ -49,11 +49,8 @@ export default function GamePage() {
       if (questionId === TOTAL_QUESTIONS) {
         submitAnswers(choice);
       } else if (questionId === category.endQuestion) {
-        const nextCategory = categories.find((c) => c.id === category.id + 1);
-        if (nextCategory) {
-          router.push(`/game/intro/${nextCategory.id}`);
-          setIsTransitioning(false);
-        }
+        router.push(`/game/results/${category.id}`);
+        setIsTransitioning(false);
       } else {
         router.push(`/game/${questionId + 1}`);
         setIsTransitioning(false);
