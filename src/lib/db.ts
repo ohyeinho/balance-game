@@ -1,3 +1,6 @@
+import fs from "fs";
+import path from "path";
+
 export interface GameResponse {
   id: string;
   name: string;
@@ -5,13 +8,27 @@ export interface GameResponse {
   createdAt: string;
 }
 
-// In-memory fallback for local development (survives HMR)
-const globalForDb = globalThis as unknown as { _responses?: GameResponse[] };
-if (!globalForDb._responses) globalForDb._responses = [];
-const inMemoryStore = globalForDb._responses;
+const DATA_FILE = path.join(process.cwd(), "data", "responses.json");
 
 function useKV(): boolean {
   return !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+}
+
+// File-based storage for local development
+function readFromFile(): GameResponse[] {
+  try {
+    if (!fs.existsSync(DATA_FILE)) return [];
+    const raw = fs.readFileSync(DATA_FILE, "utf-8");
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+function writeToFile(responses: GameResponse[]) {
+  const dir = path.dirname(DATA_FILE);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(DATA_FILE, JSON.stringify(responses, null, 2), "utf-8");
 }
 
 export async function saveResponse(
@@ -29,7 +46,9 @@ export async function saveResponse(
     const { kv } = await import("@vercel/kv");
     await kv.rpush("balance-game:responses", JSON.stringify(response));
   } else {
-    inMemoryStore.push(response);
+    const all = readFromFile();
+    all.push(response);
+    writeToFile(all);
   }
 
   return response;
@@ -44,5 +63,29 @@ export async function getAllResponses(): Promise<GameResponse[]> {
     );
   }
 
-  return [...inMemoryStore];
+  return readFromFile();
+}
+
+export async function deleteResponseById(id: string): Promise<void> {
+  if (useKV()) {
+    const { kv } = await import("@vercel/kv");
+    const all = await getAllResponses();
+    await kv.del("balance-game:responses");
+    const filtered = all.filter((r) => r.id !== id);
+    for (const r of filtered) {
+      await kv.rpush("balance-game:responses", JSON.stringify(r));
+    }
+  } else {
+    const all = readFromFile();
+    writeToFile(all.filter((r) => r.id !== id));
+  }
+}
+
+export async function clearAllResponses(): Promise<void> {
+  if (useKV()) {
+    const { kv } = await import("@vercel/kv");
+    await kv.del("balance-game:responses");
+  } else {
+    writeToFile([]);
+  }
 }

@@ -82,6 +82,85 @@ export default function ResultsPage() {
     );
   }
 
+  const handleDeleteOne = async (id: string, name: string) => {
+    if (!window.confirm(`"${name}"님의 응답을 삭제하시겠습니까?`)) return;
+
+    try {
+      const res = await fetch("/api/results", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password, id }),
+      });
+
+      if (res.ok) {
+        setResponses((prev) => prev.filter((r) => r.id !== id));
+      } else {
+        alert("삭제에 실패했습니다.");
+      }
+    } catch {
+      alert("서버 오류가 발생했습니다.");
+    }
+  };
+
+  const handleReset = async () => {
+    if (!window.confirm("정말로 모든 응답 데이터를 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.")) {
+      return;
+    }
+    if (!window.confirm("마지막 확인입니다. 정말 삭제하시겠습니까?")) {
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/results", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+
+      if (res.ok) {
+        setResponses([]);
+        alert("데이터가 초기화되었습니다.");
+      } else {
+        alert("초기화에 실패했습니다.");
+      }
+    } catch {
+      alert("서버 오류가 발생했습니다.");
+    }
+  };
+
+  // Calculate best matching couples
+  const getMatchingCouples = () => {
+    if (responses.length < 2) return [];
+
+    const pairs: { nameA: string; nameB: string; matches: number }[] = [];
+    for (let i = 0; i < responses.length; i++) {
+      for (let j = i + 1; j < responses.length; j++) {
+        let matches = 0;
+        for (let q = 1; q <= 10; q++) {
+          if (responses[i].answers[String(q)] === responses[j].answers[String(q)]) {
+            matches++;
+          }
+        }
+        pairs.push({
+          nameA: responses[i].name,
+          nameB: responses[j].name,
+          matches,
+        });
+      }
+    }
+    pairs.sort((a, b) => b.matches - a.matches);
+    return pairs.slice(0, 3);
+  };
+
+  const topCouples = getMatchingCouples();
+  const medals = ["1st", "2nd", "3rd"];
+  const medalColors = [
+    "from-yellow-400 to-amber-500",
+    "from-gray-300 to-gray-400",
+    "from-amber-600 to-amber-700",
+  ];
+  const medalEmojis = ["\uD83E\uDD47", "\uD83E\uDD48", "\uD83E\uDD49"];
+
   // Calculate stats per question
   const getStats = (qId: number) => {
     let aCount = 0;
@@ -107,6 +186,79 @@ export default function ResultsPage() {
       <p className="text-sm text-gray-400 text-center mb-6">
         총 {responses.length}명 참여
       </p>
+
+      {/* Best Matching Couples */}
+      {topCouples.length > 0 && (
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-gray-100 mb-6">
+          <h2 className="text-base font-extrabold text-gray-800 mb-1 text-center">
+            Best Matching Couples
+          </h2>
+          <p className="text-xs text-gray-400 text-center mb-4">
+            답변이 가장 많이 일치하는 조합
+          </p>
+          <div className="space-y-3">
+            {topCouples.map((couple, idx) => (
+              <div
+                key={idx}
+                className={`flex items-center gap-3 p-3 rounded-xl ${
+                  idx === 0 ? "bg-amber-50 border border-amber-200" : "bg-gray-50"
+                }`}
+              >
+                <span className="text-2xl">{medalEmojis[idx]}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-sm text-gray-800 truncate">
+                    {couple.nameA} & {couple.nameB}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    10문제 중 {couple.matches}개 일치
+                  </p>
+                </div>
+                <div
+                  className={`text-white text-xs font-extrabold px-3 py-1.5 rounded-full bg-gradient-to-r ${medalColors[idx]}`}
+                >
+                  {couple.matches * 10}%
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Participants list with delete */}
+      {responses.length > 0 && (
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-gray-100 mb-6">
+          <h2 className="text-base font-extrabold text-gray-800 mb-3 text-center">
+            참여자 목록
+          </h2>
+          <div className="space-y-2">
+            {responses.map((r) => (
+              <div
+                key={r.id}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-xl"
+              >
+                <div className="min-w-0">
+                  <span className="font-bold text-sm text-gray-800">{r.name}</span>
+                  <span className="text-xs text-gray-400 ml-2">
+                    {new Date(r.createdAt).toLocaleDateString("ko-KR", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleDeleteOne(r.id, r.name)}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-red-100 text-red-600
+                             hover:bg-red-200 active:scale-[0.95] transition-all font-medium shrink-0 ml-2"
+                >
+                  삭제
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-4">
         {questions.map((q) => {
@@ -148,31 +300,52 @@ export default function ResultsPage() {
                 </div>
               </div>
 
-              {/* Individual responses */}
-              <div className="flex flex-wrap gap-1">
-                {responses.map((r) => {
-                  const choice = r.answers[String(q.id)];
-                  return (
-                    <span
-                      key={r.id}
-                      className={`text-xs px-2 py-1 rounded-full font-medium ${
-                        choice === "A"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-orange-100 text-orange-700"
-                      }`}
-                    >
-                      {r.name}: {choice}
-                    </span>
-                  );
-                })}
+              {/* Individual responses - A vs B split */}
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="space-y-1">
+                  <p className="font-bold text-blue-500 text-center mb-1.5">A ({stats.aCount}명)</p>
+                  {responses
+                    .filter((r) => r.answers[String(q.id)] === "A")
+                    .map((r) => (
+                      <div
+                        key={r.id}
+                        className="bg-blue-50 text-blue-700 font-medium px-2.5 py-1.5 rounded-lg text-center"
+                      >
+                        {r.name}
+                      </div>
+                    ))}
+                </div>
+                <div className="space-y-1">
+                  <p className="font-bold text-orange-500 text-center mb-1.5">B ({stats.bCount}명)</p>
+                  {responses
+                    .filter((r) => r.answers[String(q.id)] === "B")
+                    .map((r) => (
+                      <div
+                        key={r.id}
+                        className="bg-orange-50 text-orange-700 font-medium px-2.5 py-1.5 rounded-lg text-center"
+                      >
+                        {r.name}
+                      </div>
+                    ))}
+                </div>
               </div>
             </div>
           );
         })}
       </div>
 
-      <div className="mt-6 mb-8 text-center text-xs text-gray-300">
-        Balance Game Admin
+      {/* Reset button */}
+      <div className="mt-8 mb-8 flex flex-col items-center gap-3">
+        <button
+          onClick={handleReset}
+          className="px-6 py-3 text-sm font-bold rounded-2xl
+                     bg-red-500 text-white
+                     hover:bg-red-600 active:scale-[0.98]
+                     transition-all duration-200"
+        >
+          데이터 초기화
+        </button>
+        <span className="text-xs text-gray-300">Balance Game Admin</span>
       </div>
     </div>
   );
