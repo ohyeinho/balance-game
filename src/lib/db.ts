@@ -5,8 +5,10 @@ export interface GameResponse {
   createdAt: string;
 }
 
-// In-memory fallback for local development (no KV setup needed)
-const inMemoryStore: GameResponse[] = [];
+// In-memory fallback for local development (survives HMR)
+const globalForDb = globalThis as unknown as { _responses?: GameResponse[] };
+if (!globalForDb._responses) globalForDb._responses = [];
+const inMemoryStore = globalForDb._responses;
 
 function useKV(): boolean {
   return !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
