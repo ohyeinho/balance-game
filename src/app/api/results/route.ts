@@ -3,6 +3,18 @@ import { getAllResponses, clearAllResponses, deleteResponseById } from "@/lib/db
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "eunsun";
 
+export async function GET() {
+  try {
+    const responses = await getAllResponses();
+    return NextResponse.json({ responses });
+  } catch {
+    return NextResponse.json(
+      { error: "서버 오류가 발생했습니다" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

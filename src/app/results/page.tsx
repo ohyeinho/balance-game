@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { questions, categories, TOTAL_QUESTIONS } from "@/lib/questions";
 
@@ -12,73 +12,41 @@ interface GameResponse {
 }
 
 export default function ResultsPage() {
-  const [password, setPassword] = useState("");
-  const [authenticated, setAuthenticated] = useState(false);
   const [responses, setResponses] = useState<GameResponse[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!password.trim()) return;
-    setLoading(true);
-    setError("");
-
-    try {
-      const res = await fetch("/api/results", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
-
-      if (!res.ok) {
+  useEffect(() => {
+    const fetchResults = async () => {
+      try {
+        const res = await fetch("/api/results");
+        if (!res.ok) {
+          setError("데이터를 불러올 수 없습니다");
+          return;
+        }
         const data = await res.json();
-        setError(data.error || "인증 실패");
-        return;
+        setResponses(data.responses);
+      } catch {
+        setError("서버 오류가 발생했습니다");
+      } finally {
+        setLoading(false);
       }
+    };
+    fetchResults();
+  }, []);
 
-      const data = await res.json();
-      setResponses(data.responses);
-      setAuthenticated(true);
-    } catch {
-      setError("서버 오류가 발생했습니다");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!authenticated) {
+  if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen px-6 animate-fade-in">
-        <div className="text-5xl mb-4">&#128274;</div>
-        <h1 className="text-xl font-extrabold text-gray-800 mb-6">
-          관리자 인증
-        </h1>
-        <div className="w-full max-w-xs">
-          <input
-            type="password"
-            placeholder="암호를 입력하세요"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-            className="w-full px-5 py-4 text-lg rounded-2xl border-2 border-gray-200
-                       focus:border-violet-400 focus:outline-none text-center
-                       bg-white/80 backdrop-blur-sm transition-colors"
-          />
-          {error && (
-            <p className="text-red-500 text-sm text-center mt-2">{error}</p>
-          )}
-          <button
-            onClick={handleLogin}
-            disabled={loading || !password.trim()}
-            className="w-full mt-4 py-4 text-lg font-bold rounded-2xl
-                       bg-violet-500 text-white
-                       hover:bg-violet-600 active:scale-[0.98]
-                       disabled:bg-gray-300 disabled:cursor-not-allowed
-                       transition-all duration-200"
-          >
-            {loading ? "확인 중..." : "확인"}
-          </button>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-gray-400 text-sm">불러오는 중...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen px-6">
+        <p className="text-red-500 text-sm">{error}</p>
       </div>
     );
   }

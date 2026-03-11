@@ -80,9 +80,16 @@ export default function CompletePage() {
       </p>
 
       <button
-        onClick={handleRestart}
+        onClick={() => router.push("/results")}
         className="px-8 py-3 rounded-2xl bg-violet-500 text-white font-bold
-                   hover:bg-violet-600 active:scale-[0.98] transition-all"
+                   hover:bg-violet-600 active:scale-[0.98] transition-all mb-3"
+      >
+        전체 결과 보기
+      </button>
+      <button
+        onClick={handleRestart}
+        className="px-8 py-3 rounded-2xl bg-gray-200 text-gray-600 font-bold
+                   hover:bg-gray-300 active:scale-[0.98] transition-all"
       >
         처음으로 돌아가기
       </button>
