@@ -25,7 +25,7 @@ export default function Home() {
         밸런스 게임
       </h1>
       <p className="text-gray-500 mb-10 text-center text-sm">
-        3가지 카테고리, 30문제로 알아보는 나의 가치관
+        3가지 카테고리, 22문제로 알아보는 나의 가치관
       </p>
 
       <div className="w-full max-w-xs">
