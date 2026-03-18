@@ -107,9 +107,9 @@ export default function GamePage() {
     3: {
       a: "hover:border-emerald-300 hover:bg-emerald-50",
       aActive: "bg-emerald-500 text-white border-emerald-500 shadow-emerald-200",
-      b: "hover:border-teal-300 hover:bg-teal-50",
-      bActive: "bg-teal-500 text-white border-teal-500 shadow-teal-200",
-      bar: "from-emerald-400 to-teal-400",
+      b: "hover:border-amber-300 hover:bg-amber-50",
+      bActive: "bg-amber-500 text-white border-amber-500 shadow-amber-200",
+      bar: "from-emerald-400 to-amber-400",
     },
   };
 

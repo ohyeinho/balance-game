@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function EntryPage() {
   const router = useRouter();
@@ -24,7 +25,15 @@ export default function EntryPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 animate-fade-in">
-      <div className="text-6xl mb-4 text-violet-500">&#128274;</div>
+      <Image 
+        src="/custom_watch.png" 
+        alt="Galaxy Watch" 
+        width={140} 
+        height={140} 
+        className="mb-6 w-36 h-36 rounded-full object-cover shadow-lg ring-1 ring-violet-200" 
+        priority 
+        unoptimized
+      />
       <h1 className="text-3xl font-extrabold text-gray-800 mb-2 text-center">
         입장 코드 확인
       </h1>
