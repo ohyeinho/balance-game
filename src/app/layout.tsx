@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "직장생활 밸런스 게임",
-  description: "당신의 직장 가치관을 알아보세요! 10가지 밸런스 게임",
+  title: "웨파 GWP 행사",
+  description: "당신의 진짜 가치관을 알아보는 22가지 밸런스 게임",
 };
 
 export const viewport: Viewport = {

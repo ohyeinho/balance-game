@@ -22,7 +22,7 @@ export default function Home() {
     <div className="flex flex-col items-center justify-center min-h-screen px-6 animate-fade-in">
       <div className="text-6xl mb-4 animate-bounce-slow">&#9878;</div>
       <h1 className="text-3xl font-extrabold text-gray-800 mb-2 text-center">
-        밸런스 게임
+        웨파 GWP 행사
       </h1>
       <p className="text-gray-500 mb-10 text-center text-sm">
         3가지 카테고리, 22문제로 알아보는 나의 가치관

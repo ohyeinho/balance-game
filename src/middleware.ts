@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (code !== '웨파2603') {
+  if (code !== '100830') {
     return NextResponse.redirect(new URL('/entry', request.url));
   }
 

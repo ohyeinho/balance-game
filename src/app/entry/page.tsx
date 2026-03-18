@@ -12,7 +12,7 @@ export default function EntryPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = code.trim();
-    if (trimmed === "웨파2603") {
+    if (trimmed === "100830") {
       // Set a cookie (valid for 1 day)
       document.cookie = `entryCode=${encodeURIComponent(trimmed)}; path=/; max-age=86400; SameSite=Lax`;
       
