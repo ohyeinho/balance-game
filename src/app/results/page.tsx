@@ -52,7 +52,7 @@ export default function ResultsPage() {
   }
 
   // Calculate best matching couples
-  const getMatchingCouples = () => {
+  const getTopRankedCouples = () => {
     if (responses.length < 2) return [];
 
     const pairs: { nameA: string; nameB: string; matches: number }[] = [];
@@ -72,10 +72,20 @@ export default function ResultsPage() {
       }
     }
     pairs.sort((a, b) => b.matches - a.matches);
-    return pairs.slice(0, 3);
+    
+    const ranks: { matches: number; couples: typeof pairs }[] = [];
+    pairs.forEach((pair) => {
+      if (ranks.length === 0 || ranks[ranks.length - 1].matches !== pair.matches) {
+        ranks.push({ matches: pair.matches, couples: [pair] });
+      } else {
+        ranks[ranks.length - 1].couples.push(pair);
+      }
+    });
+
+    return ranks.slice(0, 3);
   };
 
-  const topCouples = getMatchingCouples();
+  const topRanks = getTopRankedCouples();
   const medalColors = [
     "from-yellow-400 to-amber-500",
     "from-gray-300 to-gray-400",
@@ -109,7 +119,7 @@ export default function ResultsPage() {
       </p>
 
       {/* Best Matching Couples */}
-      {topCouples.length > 0 && (
+      {topRanks.length > 0 && (
         <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-gray-100 mb-6">
           <h2 className="text-base font-extrabold text-gray-800 mb-1 text-center">
             Best Matching Couples
@@ -118,28 +128,30 @@ export default function ResultsPage() {
             답변이 가장 많이 일치하는 조합
           </p>
           <div className="space-y-3">
-            {topCouples.map((couple, idx) => (
-              <div
-                key={idx}
-                className={`flex items-center gap-3 p-3 rounded-xl ${
-                  idx === 0 ? "bg-amber-50 border border-amber-200" : "bg-gray-50"
-                }`}
-              >
-                <span className="text-2xl">{medalEmojis[idx]}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-sm text-gray-800 truncate">
-                    {couple.nameA} & {couple.nameB}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {TOTAL_QUESTIONS}문제 중 {couple.matches}개 일치
-                  </p>
-                </div>
+            {topRanks.map((rank, rankIdx) => (
+              rank.couples.map((couple, cIdx) => (
                 <div
-                  className={`text-white text-xs font-extrabold px-3 py-1.5 rounded-full bg-gradient-to-r ${medalColors[idx]}`}
+                  key={`${rankIdx}-${cIdx}`}
+                  className={`flex items-center gap-3 p-3 rounded-xl ${
+                    rankIdx === 0 ? "bg-amber-50 border border-amber-200" : "bg-gray-50"
+                  }`}
                 >
-                  {Math.round((couple.matches / TOTAL_QUESTIONS) * 100)}%
+                  <span className="text-2xl">{medalEmojis[rankIdx] || "🏅"}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm text-gray-800 truncate">
+                      {couple.nameA} & {couple.nameB}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {TOTAL_QUESTIONS}문제 중 {couple.matches}개 일치
+                    </p>
+                  </div>
+                  <div
+                    className={`text-white text-xs font-extrabold px-3 py-1.5 rounded-full bg-gradient-to-r ${medalColors[rankIdx] || "from-gray-400 to-gray-500"}`}
+                  >
+                    {Math.round((couple.matches / TOTAL_QUESTIONS) * 100)}%
+                  </div>
                 </div>
-              </div>
+              ))
             ))}
           </div>
         </div>
