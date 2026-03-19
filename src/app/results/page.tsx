@@ -51,8 +51,8 @@ export default function ResultsPage() {
     );
   }
 
-  // Calculate best matching couples
-  const getTopRankedCouples = () => {
+  // Calculate matching couples by order
+  const getRankedCouples = (order: "desc" | "asc") => {
     if (responses.length < 2) return [];
 
     const pairs: { nameA: string; nameB: string; matches: number }[] = [];
@@ -71,7 +71,7 @@ export default function ResultsPage() {
         });
       }
     }
-    pairs.sort((a, b) => b.matches - a.matches);
+    pairs.sort((a, b) => order === "desc" ? b.matches - a.matches : a.matches - b.matches);
     
     const ranks: { matches: number; couples: typeof pairs }[] = [];
     pairs.forEach((pair) => {
@@ -85,13 +85,22 @@ export default function ResultsPage() {
     return ranks.slice(0, 3);
   };
 
-  const topRanks = getTopRankedCouples();
+  const topRanks = getRankedCouples("desc");
+  const bottomRanks = getRankedCouples("asc");
+
   const medalColors = [
     "from-yellow-400 to-amber-500",
     "from-gray-300 to-gray-400",
     "from-amber-600 to-amber-700",
   ];
-  const medalEmojis = ["\uD83E\uDD47", "\uD83E\uDD48", "\uD83E\uDD49"];
+  const medalEmojis = ["🥇", "🥈", "🥉"];
+
+  const worstColors = [
+    "from-blue-400 to-indigo-500",
+    "from-purple-400 to-purple-500",
+    "from-fuchsia-400 to-fuchsia-500",
+  ];
+  const worstEmojis = ["💔", "🧊", "🌪️"];
 
   const getStats = (qId: number) => {
     let aCount = 0;
@@ -147,6 +156,45 @@ export default function ResultsPage() {
                   </div>
                   <div
                     className={`text-white text-xs font-extrabold px-3 py-1.5 rounded-full bg-gradient-to-r ${medalColors[rankIdx] || "from-gray-400 to-gray-500"}`}
+                  >
+                    {Math.round((couple.matches / TOTAL_QUESTIONS) * 100)}%
+                  </div>
+                </div>
+              ))
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Worst Matching Couples */}
+      {bottomRanks.length > 0 && (
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-gray-100 mb-6">
+          <h2 className="text-base font-extrabold text-gray-800 mb-1 text-center">
+            Polar Opposite Couples
+          </h2>
+          <p className="text-xs text-gray-400 text-center mb-4">
+            답변이 가장 안맞는 극과 극 조합
+          </p>
+          <div className="space-y-3">
+            {bottomRanks.map((rank, rankIdx) => (
+              rank.couples.map((couple, cIdx) => (
+                <div
+                  key={`${rankIdx}-${cIdx}`}
+                  className={`flex items-center gap-3 p-3 rounded-xl ${
+                    rankIdx === 0 ? "bg-blue-50 border border-blue-200" : "bg-gray-50"
+                  }`}
+                >
+                  <span className="text-2xl">{worstEmojis[rankIdx] || "🧊"}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm text-gray-800 truncate">
+                      {couple.nameA} & {couple.nameB}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {TOTAL_QUESTIONS}문제 중 단 {couple.matches}개 일치
+                    </p>
+                  </div>
+                  <div
+                    className={`text-white text-xs font-extrabold px-3 py-1.5 rounded-full bg-gradient-to-r ${worstColors[rankIdx] || "from-gray-400 to-gray-500"}`}
                   >
                     {Math.round((couple.matches / TOTAL_QUESTIONS) * 100)}%
                   </div>
