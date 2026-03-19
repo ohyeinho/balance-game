@@ -1,13 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 
-export default function EntryPage() {
+function EntryForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
+  const [returnTo, setReturnTo] = useState("/");
+
+  useEffect(() => {
+    const returnUrl = searchParams.get("returnTo");
+    if (returnUrl && returnUrl.startsWith('/')) {
+      setReturnTo(returnUrl);
+    }
+  }, [searchParams]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,8 +25,8 @@ export default function EntryPage() {
       // Set a cookie (valid for 1 day)
       document.cookie = `entryCode=${encodeURIComponent(trimmed)}; path=/; max-age=86400; SameSite=Lax`;
       
-      // Navigate to home page
-      router.push("/");
+      // Navigate to original page or home
+      router.push(returnTo);
     } else {
       setError("입장 코드가 올바르지 않습니다.");
     }
@@ -72,5 +81,13 @@ export default function EntryPage() {
         </button>
       </form>
     </div>
+  );
+}
+
+export default function EntryPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-500">불러오는 중...</div>}>
+      <EntryForm />
+    </Suspense>
   );
 }

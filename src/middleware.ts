@@ -11,7 +11,9 @@ export function middleware(request: NextRequest) {
   }
 
   if (code !== '100830') {
-    return NextResponse.redirect(new URL('/entry', request.url));
+    const url = new URL('/entry', request.url);
+    url.searchParams.set('returnTo', request.nextUrl.pathname + request.nextUrl.search);
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();

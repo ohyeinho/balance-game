@@ -127,11 +127,11 @@ export default function ResultsPage() {
         총 {responses.length}명 참여
       </p>
 
-      {/* Best Matching Couples */}
+      {/* Best Matching Pairs */}
       {topRanks.length > 0 && (
         <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-gray-100 mb-6">
           <h2 className="text-base font-extrabold text-gray-800 mb-1 text-center">
-            Best Matching Couples
+            Best Matching Pairs
           </h2>
           <p className="text-xs text-gray-400 text-center mb-4">
             답변이 가장 많이 일치하는 조합
@@ -166,11 +166,11 @@ export default function ResultsPage() {
         </div>
       )}
 
-      {/* Worst Matching Couples */}
+      {/* Worst Matching Pairs */}
       {bottomRanks.length > 0 && (
         <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-gray-100 mb-6">
           <h2 className="text-base font-extrabold text-gray-800 mb-1 text-center">
-            Polar Opposite Couples
+            Polar Opposite Pairs
           </h2>
           <p className="text-xs text-gray-400 text-center mb-4">
             답변이 가장 안맞는 극과 극 조합
