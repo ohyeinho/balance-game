@@ -21,7 +21,8 @@ function EntryForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = code.trim();
-    if (trimmed === "100830") {
+    const allowedCodes = ['100830', '아콩이콩', '삼성'];
+    if (allowedCodes.includes(trimmed)) {
       // Set a cookie (valid for 1 day)
       document.cookie = `entryCode=${encodeURIComponent(trimmed)}; path=/; max-age=86400; SameSite=Lax`;
       

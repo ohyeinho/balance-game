@@ -3,9 +3,10 @@ import { getAllResponses, clearAllResponses, deleteResponseById } from "@/lib/db
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "eunsun";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const responses = await getAllResponses();
+    const entryCode = request.cookies.get('entryCode')?.value || '100830';
+    const responses = await getAllResponses(entryCode);
     return NextResponse.json({ responses });
   } catch {
     return NextResponse.json(

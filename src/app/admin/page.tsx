@@ -8,6 +8,7 @@ interface GameResponse {
   name: string;
   answers: Record<string, "A" | "B">;
   createdAt: string;
+  entryCode?: string;
 }
 
 export default function AdminPage() {
@@ -132,8 +133,19 @@ export default function AdminPage() {
     }
   };
 
+  const codes = ["100830", "아콩이콩", "삼성"];
+  const [activeCode, setActiveCode] = useState("100830");
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const index = Math.round(el.scrollLeft / el.clientWidth);
+    if (codes[index] && codes[index] !== activeCode) {
+      setActiveCode(codes[index]);
+    }
+  };
+
   return (
-    <div className="min-h-screen px-4 py-6 animate-fade-in">
+    <div className="min-h-screen px-4 py-6 animate-fade-in flex flex-col">
       <h1 className="text-xl font-extrabold text-gray-800 mb-1 text-center">
         관리자 설정
       </h1>
@@ -141,46 +153,97 @@ export default function AdminPage() {
         총 {responses.length}명 참여
       </p>
 
-      {/* Participants list with delete */}
-      <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-gray-100 mb-6">
-        <h2 className="text-base font-extrabold text-gray-800 mb-3 text-center">
-          참여자 목록
-        </h2>
-        {responses.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-4">
-            참여자가 없습니다.
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {responses.map((r) => (
-              <div
-                key={r.id}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-xl"
-              >
-                <div className="min-w-0">
-                  <span className="font-bold text-sm text-gray-800">
-                    {r.name}
-                  </span>
-                  <span className="text-xs text-gray-400 ml-2">
-                    {new Date(r.createdAt).toLocaleDateString("ko-KR", {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+      {/* Tabs */}
+      <div className="flex justify-center gap-2 mb-4 px-2">
+        {codes.map((code) => (
+          <button
+            key={code}
+            onClick={() => {
+              setActiveCode(code);
+              document.getElementById(`slide-${code}`)?.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest",
+                inline: "center",
+              });
+            }}
+            className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-colors ${
+              activeCode === code
+                ? "bg-violet-500 text-white shadow-md"
+                : "bg-white/80 text-gray-500 hover:bg-gray-100"
+            }`}
+          >
+            {code}
+          </button>
+        ))}
+      </div>
+
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+
+      {/* Swipeable Container */}
+      <div 
+        className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar mb-6 -mx-4 px-4 pb-4"
+        onScroll={handleScroll}
+      >
+        {codes.map((code) => {
+          // Fallback to "100830" if r.entryCode is undefined for older data
+          const groupResponses = responses.filter(
+            (r) => (r.entryCode || "100830") === code
+          );
+          
+          return (
+            <div key={code} id={`slide-${code}`} className="w-full shrink-0 snap-center px-2">
+              <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-gray-100 h-full min-h-[300px]">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-base font-extrabold text-gray-800">
+                    참여자 목록 ({code})
+                  </h2>
+                  <span className="text-xs font-bold bg-violet-100 text-violet-600 px-2 py-1 rounded-lg">
+                    {groupResponses.length}명
                   </span>
                 </div>
-                <button
-                  onClick={() => handleDeleteOne(r.id, r.name)}
-                  className="text-xs px-3 py-1.5 rounded-lg bg-red-100 text-red-600
-                             hover:bg-red-200 active:scale-[0.95] transition-all font-medium shrink-0 ml-2"
-                >
-                  삭제
-                </button>
+                
+                {groupResponses.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-8">
+                    이 코드로 참여한 사람이 없습니다.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {groupResponses.map((r) => (
+                      <div
+                        key={r.id}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded-xl"
+                      >
+                        <div className="min-w-0">
+                          <span className="font-bold text-sm text-gray-800">
+                            {r.name}
+                          </span>
+                          <span className="text-xs text-gray-400 ml-2">
+                            {new Date(r.createdAt).toLocaleDateString("ko-KR", {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteOne(r.id, r.name)}
+                          className="text-xs px-3 py-1.5 rounded-lg bg-red-100 text-red-600
+                                     hover:bg-red-200 active:scale-[0.95] transition-all font-medium shrink-0 ml-2"
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Reset button */}

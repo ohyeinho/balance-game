@@ -10,7 +10,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (code !== '100830') {
+  const allowedCodes = ['100830', '아콩이콩', '삼성'];
+  if (!code || !allowedCodes.includes(code)) {
     const url = new URL('/entry', request.url);
     url.searchParams.set('returnTo', request.nextUrl.pathname + request.nextUrl.search);
     return NextResponse.redirect(url);

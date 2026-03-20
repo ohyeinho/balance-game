@@ -6,6 +6,7 @@ export interface GameResponse {
   name: string;
   answers: Record<string, "A" | "B">;
   createdAt: string;
+  entryCode?: string;
 }
 
 const DATA_FILE = path.join(process.cwd(), "data", "responses.json");
@@ -33,13 +34,15 @@ function writeToFile(responses: GameResponse[]) {
 
 export async function saveResponse(
   name: string,
-  answers: Record<string, "A" | "B">
+  answers: Record<string, "A" | "B">,
+  entryCode: string
 ): Promise<GameResponse> {
   const response: GameResponse = {
     id: crypto.randomUUID(),
     name,
     answers,
     createdAt: new Date().toISOString(),
+    entryCode,
   };
 
   if (useKV()) {
@@ -54,16 +57,26 @@ export async function saveResponse(
   return response;
 }
 
-export async function getAllResponses(): Promise<GameResponse[]> {
+export async function getAllResponses(filterEntryCode?: string): Promise<GameResponse[]> {
+  let all: GameResponse[] = [];
   if (useKV()) {
     const { kv } = await import("@vercel/kv");
     const raw = await kv.lrange("balance-game:responses", 0, -1);
-    return raw.map((item) =>
+    all = raw.map((item) =>
       typeof item === "string" ? JSON.parse(item) : (item as GameResponse)
     );
+  } else {
+    all = readFromFile();
   }
 
-  return readFromFile();
+  // default to 100830 if entryCode is missing for backwards compat
+  all = all.map(r => ({ ...r, entryCode: r.entryCode || '100830' }));
+
+  if (filterEntryCode) {
+    all = all.filter(r => r.entryCode === filterEntryCode);
+  }
+
+  return all;
 }
 
 export async function deleteResponseById(id: string): Promise<void> {

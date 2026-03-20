@@ -33,7 +33,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const response = await saveResponse(name.trim(), answers);
+    const entryCode = request.cookies.get('entryCode')?.value || '100830';
+    const response = await saveResponse(name.trim(), answers, entryCode);
     return NextResponse.json({ success: true, id: response.id });
   } catch {
     return NextResponse.json(
