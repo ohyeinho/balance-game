@@ -52,6 +52,13 @@ export default function Home() {
           시작하기
         </button>
       </div>
+
+      <button
+        onClick={() => router.push("/entry")}
+        className="mt-6 text-sm text-gray-400 hover:text-gray-600 underline underline-offset-4 transition-colors"
+      >
+        입장코드 변경
+      </button>
     </div>
   );
 }
