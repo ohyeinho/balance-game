@@ -18,6 +18,18 @@ export default function AdminPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Tabs / swipeable state
+  const codes = ["100830", "아콩이콩", "삼성"];
+  const [activeCode, setActiveCode] = useState("100830");
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const index = Math.round(el.scrollLeft / el.clientWidth);
+    if (codes[index] && codes[index] !== activeCode) {
+      setActiveCode(codes[index]);
+    }
+  };
+
   const handleLogin = async () => {
     if (!password.trim()) return;
     setLoading(true);
@@ -130,17 +142,6 @@ export default function AdminPage() {
       }
     } catch {
       alert("서버 오류가 발생했습니다.");
-    }
-  };
-
-  const codes = ["100830", "아콩이콩", "삼성"];
-  const [activeCode, setActiveCode] = useState("100830");
-
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const el = e.currentTarget;
-    const index = Math.round(el.scrollLeft / el.clientWidth);
-    if (codes[index] && codes[index] !== activeCode) {
-      setActiveCode(codes[index]);
     }
   };
 
