@@ -261,26 +261,32 @@ export default function ResultsPage() {
                     </p>
 
                     {/* Stats bar */}
-                    <div className="flex gap-1 mb-3 h-8 rounded-xl overflow-hidden text-xs font-bold">
-                      <div
-                        className="bg-blue-500 text-white flex items-center justify-center transition-all duration-500 rounded-l-xl"
-                        style={{
-                          width: `${stats.aPercent || 1}%`,
-                          minWidth: stats.aCount > 0 ? "2rem" : "0",
-                        }}
-                      >
-                        {stats.aPercent}%
+                    {stats.aCount === 0 && stats.bCount === 0 ? (
+                      <div className="flex bg-gray-100 rounded-xl mb-3 h-8 items-center justify-center text-xs font-bold text-gray-400">
+                        아직 응답이 없습니다
                       </div>
-                      <div
-                        className="bg-orange-500 text-white flex items-center justify-center transition-all duration-500 rounded-r-xl"
-                        style={{
-                          width: `${stats.bPercent || 1}%`,
-                          minWidth: stats.bCount > 0 ? "2rem" : "0",
-                        }}
-                      >
-                        {stats.bPercent}%
+                    ) : (
+                      <div className="flex gap-1 mb-3 h-8 rounded-xl overflow-hidden text-xs font-bold">
+                        <div
+                          className="bg-blue-500 text-white flex items-center justify-center transition-all duration-500 rounded-l-xl"
+                          style={{
+                            width: `${stats.aPercent || 1}%`,
+                            minWidth: stats.aCount > 0 ? "2rem" : "0",
+                          }}
+                        >
+                          {stats.aPercent}%
+                        </div>
+                        <div
+                          className="bg-orange-500 text-white flex items-center justify-center transition-all duration-500 rounded-r-xl"
+                          style={{
+                            width: `${stats.bPercent || 1}%`,
+                            minWidth: stats.bCount > 0 ? "2rem" : "0",
+                          }}
+                        >
+                          {stats.bPercent}%
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* Options */}
                     <div className="grid grid-cols-2 gap-2 text-xs mb-3">
