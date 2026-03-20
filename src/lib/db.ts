@@ -102,3 +102,18 @@ export async function clearAllResponses(): Promise<void> {
     writeToFile([]);
   }
 }
+
+export async function clearResponsesByCode(entryCode: string): Promise<void> {
+  const all = await getAllResponses();
+  const filtered = all.filter((r) => r.entryCode !== entryCode);
+  
+  if (useKV()) {
+    const { kv } = await import("@vercel/kv");
+    await kv.del("balance-game:responses");
+    for (const r of filtered) {
+      await kv.rpush("balance-game:responses", JSON.stringify(r));
+    }
+  } else {
+    writeToFile(filtered);
+  }
+}

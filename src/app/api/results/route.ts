@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllResponses, clearAllResponses, deleteResponseById } from "@/lib/db";
+import { getAllResponses, clearAllResponses, deleteResponseById, clearResponsesByCode } from "@/lib/db";
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "eunsun";
 
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const body = await request.json();
-    const { password } = body;
+    const { password, id, entryCode } = body;
 
     if (password !== ADMIN_PASSWORD) {
       return NextResponse.json(
@@ -50,9 +50,10 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const { id } = body;
     if (id) {
       await deleteResponseById(id);
+    } else if (entryCode) {
+      await clearResponsesByCode(entryCode);
     } else {
       await clearAllResponses();
     }
